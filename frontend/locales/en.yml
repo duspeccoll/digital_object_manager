@@ -1,0 +1,18 @@
+en:
+  plugins:
+    digitized_object:
+      title: Create Digitized Object
+      label: Create Digitized Object
+      search_label: Search Items
+      actions:
+        cancel: Cancel
+        create: Create New
+        replace: Replace
+        search: Search
+        select: Select
+        view: View
+      messages:
+        error: "Unable to create object:"
+        success: "Success:"
+      _singular: Create Digitized Object
+      _plural: Create Digitized Objects

@@ -1,0 +1,9 @@
+<%= setup_context :title => I18n.t("plugins.digitized_object.title") %>
+
+<div class="row">
+  <div class="col-md-8">
+    <h2><%= I18n.t("plugins.digitized_object.title") %></h2>
+    <%= render_aspace_partial :partial => "search_form" %>
+</div>
+
+<link rel="stylesheet" type="text/css" media="all" href="<%= "#{AppConfig[:frontend_prefix]}assets/styles/digitized_object.css" %>"></link>

@@ -1,0 +1,7 @@
+.form-search,
+.digitized-object-results {
+	border: 1px solid #DDD;
+	border-radius: 5px;
+	background-color: #FFF;
+	padding: 10px;
+}

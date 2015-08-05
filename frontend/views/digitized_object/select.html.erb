@@ -1,0 +1,48 @@
+<%= setup_context :trail => [[I18n.t("plugins.digitized_object.title"), { :controller => :digitized_object, :action => :index }]], :title => "Create digital object for #{@item['title']}" %>
+
+<div class="row">
+  <div class="col-md-8">
+    <h2><%= I18n.t("plugins.digitized_object.title") %></h2>
+
+    <%= render_aspace_partial :partial => "shared/flash_messages" %>
+
+    <h3><%= @item['title'] %></h3>
+    <h4><%= @item['component_id'] %></h4>
+
+    <% if @objects.length > 0 %>
+      <p>Digital objects attached to this item:</p>
+      <table class="table table-striped table-bordered table-condensed table-hover table-digitized-object">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>URL</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% @objects.each do |object| %>
+          <tr>
+            <td><%= @item['title'] %></td>
+            <td><%= object %></td>
+            <td>
+              <div class="btn-group pull-right">
+                <%= link_to I18n.t("plugins.digitized_object.actions.view"), {:controller => :resolver, :action => :resolve_readonly, :uri => object}, :class => "btn btn-xs btn-default" %>
+                <!--<%= link_to I18n.t("plugins.digitized_object.actions.replace"), {:controller => :digitized_object, :action => :replace, :item => @item['uri'], :object => object}, :class => "btn btn-xs btn-primary" %>-->
+              </div>
+            </td>
+          </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p>No digital objects associated with this item.</p>
+    <% end %>
+    <p>
+      <%= link_to I18n.t("plugins.digitized_object.actions.create"), {:controller => :digitized_object, :action => :create, :item => @item['uri']}, :class => "btn btn-xs btn-primary" %>
+    </p>
+  </div>
+</div>
+<hr/>
+
+<%= render_aspace_partial :partial => "search_form" %>
