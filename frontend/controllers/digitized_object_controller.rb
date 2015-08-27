@@ -97,6 +97,7 @@ class DigitizedObjectController < ApplicationController
 				:date_type => "single",
 				:expression => "undated"
 				}))
+		end
 		date = get_date()
 		dates.push(date)
 
