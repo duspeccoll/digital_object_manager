@@ -1,7 +1,18 @@
-.form-search,
-.digitized-object-results {
+.form-group {
+	border: 1px solid #DDD;
+	background-color: white;
+	padding: 10px;
+}
+
+.digitized-object-search-form {
 	border: 1px solid #DDD;
 	border-radius: 5px;
+	background-color: #FFF;
+	padding: 4px;
+}
+
+.digitized-object-record-pane {
+	border-top: 0 none;
 	background-color: #FFF;
 	padding: 10px;
 }

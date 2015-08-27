@@ -1,7 +1,7 @@
 class DigitizedObjectController < ApplicationController
 
 	set_access_control "view_repository" => [:index, :search, :select],
-	                   "update_digital_object_record" => [:create, :replace]
+	                   "update_digital_object_record" => [:create, :merge]
 
 	def index
 		@page = 1
@@ -24,59 +24,81 @@ class DigitizedObjectController < ApplicationController
 
 	def create
 		item = JSONModel::HTTP::get_json(params[:item])
-		item_uri = item['uri']
-		item_title = item['title']
-
 		object = item_converter(item)
 
     response = JSONModel::HTTP.post_json(URI("#{JSONModel::HTTP.backend_url}/repositories/#{session[:repo_id]}/digital_objects"), object)
 		if response.code === "200"
-			id = ASUtils.json_parse(response.body)['id']
-			uri = ASUtils.json_parse(response.body)['uri']
-			digital_object_title = JSONModel::HTTP.get_json(uri)['title']
-			flash.now[:success] = "Digital object <strong>#{digital_object_title}</strong> created".html_safe
+			object_id = ASUtils.json_parse(response.body)['id']
+			object_uri = ASUtils.json_parse(response.body)['uri']
+			flash[:success] = I18n.t("plugins.digitized_object.messages.object_create", :title => "#{JSONModel::HTTP.get_json(object_uri)["title"]}").html_safe
 
-			item['instances'].push(JSONModel(:instance).new({
-				:instance_type => "digital_object",
-				:digital_object => { :ref => uri }
-				}))
+      item = item_updater(item, object_uri)
 
-			item = item.to_json
-
-			item_response = JSONModel::HTTP.post_json(URI("#{JSONModel::HTTP.backend_url}#{item_uri}"), item)
+			item_response = JSONModel::HTTP.post_json(URI("#{JSONModel::HTTP.backend_url}#{item["uri"]}"), item.to_json)
 			if item_response.code === "200"
-				flash.now[:success] << "<br />Archival object <strong>#{item_title}</strong> updated".html_safe
+				flash[:success] << I18n.t("plugins.digitized_object.messages.item_update", :title => "#{item["title"]}").html_safe
 			else
-				flash.now[:error] = "Could not add digital object ref: <strong>#{item_uri}</strong>".html_safe
+				flash[:error] = I18n.t("plugins.digitized_object.messages.item_error", :uri => "#{item["uri"]}").html_safe
 			end
 
-			redirect_to :controller => :digital_objects, :action => :show, :id => id
+			redirect_to :controller => :digital_objects, :action => :show, :id => object_id
 		else
-			flash.now[:error] = "#{I18n.t("plugins.digitized_object.messages.error")} #{ASUtils.json_parse(response.body)["error"].to_s}".html_safe
+			flash[:error] = "#{I18n.t("plugins.digitized_object.messages.error")} #{ASUtils.json_parse(response.body)["error"].to_s}".html_safe
 			redirect_to request.referer
 		end
 
 	end
 
-	def replace
+	def merge
+		# Merges item metadata into the digital object, overwriting what it finds.
+		# Depending on how this tests we may need a separate method for the opposite action.
 		item = JSONModel::HTTP::get_json(params[:item])
 		object = JSONModel::HTTP::get_json(params[:object])
+		new_object = item_merger(item, object)
+
+		response = JSONModel::HTTP.post_json(URI("#{JSONModel::HTTP.backend_url}#{params[:object]}"), new_object.to_json)
+	  if response.code === "200"
+			object_id = ASUtils.json_parse(response.body)['id']
+			object_uri = ASUtils.json_parse(response.body)['uri']
+			flash[:success] = I18n.t("plugins.digitized_object.messages.object_update", :title => "#{JSONModel::HTTP.get_json(object_uri)["title"]}").html_safe
+			redirect_to :controller => :digital_objects, :action => :show, :id => object_id
+		else
+			object_error = ASUtils.json_parse(response_body)['error'].to_s
+			flash[:error] = I18n.t("plugins.digitized_object.messages.object_error", :error => "#{object_error}").html_safe
+			redirect_to request.referer
+		end
+
 	end
 
 	private
 
-	def item_converter(item)
+	def get_date
+		# Supplies the current date. To be replaced with user input one day.
 		time = Time.new()
-
-		# date handler:
-		# copies existing dates without system fields, adds the current date as digitization date
-		dates = Array.new(item['dates'])
-		dates.push(JSONModel(:date).new({
+		date = JSONModel(:date).new({
 			:label => "digitized",
 			:date_type => "single",
 			:expression => time.strftime("%Y %B").to_s + " " + time.day.to_s,
 			:begin => time.strftime("%Y-%m-%d")
-			}))
+		})
+
+		date
+	end
+
+  # method to convert item record metadata to digital object metadata
+
+	def item_converter(item)
+		# date handler:
+		# copies existing dates without system fields, adds the current date as digitization date
+		dates = Array.new(item['dates'])
+		if dates.empty?
+			dates.push(JSONModel(:date).new({
+				:label => "creation",
+				:date_type => "single",
+				:expression => "undated"
+				}))
+		date = get_date()
+		dates.push(date)
 
 		# linked agent handler:
 		# copies existing agents, flips creator to source, adds Special Collections and Archives as creator
@@ -92,7 +114,109 @@ class DigitizedObjectController < ApplicationController
 			})
 
 		# notes handler:
-		# I don't know about this one yet, it's complicated
+		# converts Archival Object-typed notes to Digital Object types
+		notes = note_handler(item)
+
+		object = JSONModel(:digital_object).new({
+			:title => item['title'],
+			:digital_object_id => item['component_id'],
+			:publish => true,
+			:language => (item['language'] if defined? item['language']),
+			:dates => dates,
+			:extents => item['extents'],
+			:subjects => item['subjects'],
+			:linked_agents => linked_agents,
+			:notes => notes
+		}.reject{ |k,v| v.nil? }).to_json
+
+		object
+	end
+
+	def item_updater(item, object_uri)
+		item['instances'].push(JSONModel(:instance).new({
+			:instance_type => "digital_object",
+			:digital_object => { :ref => object_uri }
+			}))
+
+		date = get_date()
+		if item['dates'].empty?
+			item['dates'].push(JSONModel(:date).new({
+				:label => "creation",
+				:date_type => "single",
+				:expression => "undated"
+				}))
+		else
+			item['dates'].delete_if { |h| h['label'] == "digitized" }
+		end
+
+		item['dates'].push(date)
+
+		item
+	end
+
+  # method to merge item record metadata into an existing digital object
+	# (assumes that the item record's metadata is primary)
+	def item_merger(item, object)
+		# make sure the object is published
+		object['publish'] = true
+
+		# it brings the language over from the item record, if not found in the object
+		if defined? item['language']
+			if object['language'] !=  item['language']
+				object['language'] = item['language']
+			end
+		end
+
+    # it merges item dates into the object if no dates are present in the object, or if the dates don't match
+		# it also adds a digitization date if none is present
+		if object['dates'].empty?
+			object['dates'] = item['dates']
+			# add a digitization date
+			date = get_date()
+			object['dates'].push(date)
+		else
+			# need to refine this, there's more going on here
+			if object['dates'] != item['dates']
+				object['dates'] = item['dates']
+			end
+		end
+
+		# it copies the item's extents into the digital object
+		if object['extents'].empty? || object['extents'] != item['extents']
+			object['extents'] = item['extents']
+		end
+
+		# it copies the item's subject headings into the digital object
+		if object['subjects'].empty? || object['subjects'] != item['subjects']
+			object['subjects'] = item['subjects']
+		end
+
+    # it copies the item's linked agents into the digital object, if the digital object has none
+		# otherwise it does nothing (this needs refinement)
+		if object['linked_agents'].empty?
+			linked_agents = Array.new(item['linked_agents'])
+			linked_agents.each do |linked_agent|
+				if linked_agent['role'] == "creator"
+					linked_agent['role'] = "source"
+				end
+			end
+			linked_agents.push({
+				:role => "creator",
+				:ref => "\/agents\/corporate_entities\/987"
+				})
+			object['linked_agents'] = linked_agents
+		end
+
+		# runs the note handler if there are no notes present in the digital object
+		if object['notes'].empty?
+			notes = note_handler(item)
+			object['notes'] = notes
+		end
+
+		object
+	end
+
+	def note_handler(item)
 		notes = Array.new()
 		item['notes'].each do |note|
 			if note['jsonmodel_type'] == "note_multipart"
@@ -111,6 +235,7 @@ class DigitizedObjectController < ApplicationController
 					:publish => note['publish']
 					}))
 			end
+
 			if note['type'] == "odd"
 				if note.has_key?('label')
 				  if note['label'] == "Inscription and Marks"
@@ -128,6 +253,7 @@ class DigitizedObjectController < ApplicationController
 						}))
 				end
 			end
+
 			if note['type'] == "custodhist"
 				notes.push(JSONModel(:note_digital_object).new({
 					:type => note['type'],
@@ -136,20 +262,6 @@ class DigitizedObjectController < ApplicationController
 					}))
 			end
 		end
-
-		object = JSONModel(:digital_object).new({
-			:title => item['title'],
-			:digital_object_id => item['component_id'],
-			:publish => true,
-			:language => (item['language'] if defined? item['language']),
-			:dates => dates,
-			:extents => item['extents'],
-			:subjects => item['subjects'],
-			:linked_agents => linked_agents,
-			:notes => notes
-		}.reject{ |k,v| v.nil? }).to_json
-
-		object
+	  notes
 	end
-
 end

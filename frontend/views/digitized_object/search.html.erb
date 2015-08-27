@@ -7,4 +7,10 @@
   </div>
 </div>
 <hr />
-<%= render_aspace_partial :partial => "search_form" %>
+<div class="row">
+  <div class="col-md-8">
+    <%= render_aspace_partial :partial => "search_form" %>
+  </div>
+</div>
+
+<link rel="stylesheet" type="text/css" media="all" href="<%= "#{AppConfig[:frontend_prefix]}assets/styles/digitized_object.css" %>"></link>
