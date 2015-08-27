@@ -1,8 +1,8 @@
 en:
   plugins:
     digitized_object:
-      title: Create Digitized Object
-      label: Create Digitized Object
+      title: Digital Object Manager
+      label: Digital Object Manager
       search_label: Search Items
       actions:
         create: Create New
@@ -15,5 +15,3 @@ en:
         object_error: "Unable to create object: <strong>%{error}</strong>"
         item_update: "<br/>Archival object <strong>%{title}</strong> updated"
         item_error: "Couldn't add object reference: <strong>%{uri}</strong>"
-      _singular: Create Digitized Object
-      _plural: Create Digitized Objects

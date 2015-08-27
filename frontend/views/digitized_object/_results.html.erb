@@ -6,7 +6,8 @@
     <thead>
       <tr>
         <th>Title</th>
-        <th>Item Record #</th>
+        <th>Record Number</th>
+        <th>Level</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -17,6 +18,7 @@
       <tr>
         <td><%= clean_mixed_content(result["title"]).html_safe %></td>
         <td><%= clean_mixed_content(item["component_id"]).html_safe %></td>
+        <td><%= clean_mixed_content(I18n.t("enumerations.archival_record_level.#{item["level"]}")).html_safe %></td>
         <td>
           <div class="btn-group pull-right">
             <%= link_to I18n.t("plugins.digitized_object.actions.view"), {:controller => :resolver, :action => :resolve_readonly, :uri => result["id"]}, :class => "btn btn-xs btn-default" %>

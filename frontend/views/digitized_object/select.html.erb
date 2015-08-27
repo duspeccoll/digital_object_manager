@@ -9,6 +9,13 @@
 
       <h3><%= @item['title'] %></h3>
       <h4><%= @item['component_id'] %></h4>
+      <% @item['notes'].each do |note| %>
+        <% if note['type'] == "abstract" %>
+          <% note['content'].each do |content| %>
+            <p><%= content %></p>
+          <% end %>
+        <% end %>
+      <% end %>
 
       <% if @objects.length > 0 %>
         <p>Digital objects attached to this item:</p>
