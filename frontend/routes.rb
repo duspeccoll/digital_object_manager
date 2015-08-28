@@ -1,9 +1,9 @@
 ArchivesSpace::Application.routes.draw do
 
-  match('/plugins/digitized_object' => 'digitized_object#index', :via => [:get])
-  match('/plugins/digitized_object/search' => 'digitized_object#search', :via => [:get])
-  match('/plugins/digitized_object/select' => 'digitized_object#select', :via => [:get])
-  match('/plugins/digitized_object/create' => 'digitized_object#create', :via => [:get])
-  match('/plugins/digitized_object/merge' => 'digitized_object#merge', :via => [:get])
+  match('/plugins/digital_object_manager' => 'digital_object_manager#index', :via => [:get])
+  match('/plugins/digital_object_manager/search' => 'digital_object_manager#search', :via => [:get])
+  match('/plugins/digital_object_manager/select' => 'digital_object_manager#select', :via => [:get])
+  match('/plugins/digital_object_manager/create' => 'digital_object_manager#create', :via => [:get])
+  match('/plugins/digital_object_manager/merge' => 'digital_object_manager#merge', :via => [:get])
 
 end

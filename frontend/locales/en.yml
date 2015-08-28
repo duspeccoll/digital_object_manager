@@ -1,6 +1,6 @@
 en:
   plugins:
-    digitized_object:
+    digital_object_manager:
       title: Digital Object Manager
       label: Digital Object Manager
       search_label: Search Items

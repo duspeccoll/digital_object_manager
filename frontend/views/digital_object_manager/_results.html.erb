@@ -21,8 +21,8 @@
         <td><%= clean_mixed_content(I18n.t("enumerations.archival_record_level.#{item["level"]}")).html_safe %></td>
         <td>
           <div class="btn-group pull-right">
-            <%= link_to I18n.t("plugins.digitized_object.actions.view"), {:controller => :resolver, :action => :resolve_readonly, :uri => result["id"]}, :class => "btn btn-xs btn-default" %>
-            <%= link_to I18n.t("plugins.digitized_object.actions.select"), {:controller => :digitized_object, :action => :select, :uri => result["id"]}, :class => "btn btn-xs btn-primary" %>
+            <%= link_to I18n.t("plugins.digital_object_manager.actions.view"), {:controller => :resolver, :action => :resolve_readonly, :uri => result["id"]}, :class => "btn btn-xs btn-default" %>
+            <%= link_to I18n.t("plugins.digital_object_manager.actions.select"), {:controller => :digital_object_manager, :action => :select, :uri => result["id"]}, :class => "btn btn-xs btn-primary" %>
           </div>
         </td>
       </tr>

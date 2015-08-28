@@ -1,7 +1,7 @@
-<%= form_tag({:controller => :digitized_object, :action => :search}, :method => "get", :class => "form-search") do %>
+<%= form_tag({:controller => :digital_object_manager, :action => :search}, :method => "get", :class => "form-search") do %>
 
 <div class="control-group form-group required">
-  <label class="control-label"><%= I18n.t("plugins.digitized_object.search_label") %></label>
+  <label class="control-label"><%= I18n.t("plugins.digital_object_manager.search_label") %></label>
   <div class="controls">
     <input id="object-search-box" class="object-search-box" type="text" name="q" placeholder="Search for items..." class="input-large"></input>
     <button type="submit" id="object-search-button" class="btn btn-default" title="Search Items">

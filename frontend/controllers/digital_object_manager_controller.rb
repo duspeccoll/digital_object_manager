@@ -1,4 +1,4 @@
-class DigitizedObjectController < ApplicationController
+class DigitalObjectManagerController < ApplicationController
 
 	set_access_control "view_repository" => [:index, :search, :select],
 	                   "update_digital_object_record" => [:create, :merge]
@@ -30,20 +30,20 @@ class DigitizedObjectController < ApplicationController
 		if response.code === "200"
 			object_id = ASUtils.json_parse(response.body)['id']
 			object_uri = ASUtils.json_parse(response.body)['uri']
-			flash[:success] = I18n.t("plugins.digitized_object.messages.object_create", :title => "#{JSONModel::HTTP.get_json(object_uri)["title"]}").html_safe
+			flash[:success] = I18n.t("plugins.digital_object_manager.messages.object_create", :title => "#{JSONModel::HTTP.get_json(object_uri)["title"]}").html_safe
 
       item = item_updater(item, object_uri)
 
 			item_response = JSONModel::HTTP.post_json(URI("#{JSONModel::HTTP.backend_url}#{item["uri"]}"), item.to_json)
 			if item_response.code === "200"
-				flash[:success] << I18n.t("plugins.digitized_object.messages.item_update", :title => "#{item["title"]}").html_safe
+				flash[:success] << I18n.t("plugins.digital_object_manager.messages.item_update", :title => "#{item["title"]}").html_safe
 			else
-				flash[:error] = I18n.t("plugins.digitized_object.messages.item_error", :uri => "#{item["uri"]}").html_safe
+				flash[:error] = I18n.t("plugins.digital_object_manager.messages.item_error", :uri => "#{item["uri"]}").html_safe
 			end
 
 			redirect_to :controller => :digital_objects, :action => :show, :id => object_id
 		else
-			flash[:error] = "#{I18n.t("plugins.digitized_object.messages.error")} #{ASUtils.json_parse(response.body)["error"].to_s}".html_safe
+			flash[:error] = "#{I18n.t("plugins.digital_object_manager.messages.error")} #{ASUtils.json_parse(response.body)["error"].to_s}".html_safe
 			redirect_to request.referer
 		end
 
@@ -60,11 +60,11 @@ class DigitizedObjectController < ApplicationController
 	  if response.code === "200"
 			object_id = ASUtils.json_parse(response.body)['id']
 			object_uri = ASUtils.json_parse(response.body)['uri']
-			flash[:success] = I18n.t("plugins.digitized_object.messages.object_update", :title => "#{JSONModel::HTTP.get_json(object_uri)["title"]}").html_safe
+			flash[:success] = I18n.t("plugins.digital_object_manager.messages.object_update", :title => "#{JSONModel::HTTP.get_json(object_uri)["title"]}").html_safe
 			redirect_to :controller => :digital_objects, :action => :show, :id => object_id
 		else
 			object_error = ASUtils.json_parse(response_body)['error'].to_s
-			flash[:error] = I18n.t("plugins.digitized_object.messages.object_error", :error => "#{object_error}").html_safe
+			flash[:error] = I18n.t("plugins.digital_object_manager.messages.object_error", :error => "#{object_error}").html_safe
 			redirect_to request.referer
 		end
 
