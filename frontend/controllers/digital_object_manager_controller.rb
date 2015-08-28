@@ -72,21 +72,6 @@ class DigitalObjectManagerController < ApplicationController
 
 	private
 
-	def get_date
-		# Supplies the current date. To be replaced with user input one day.
-		time = Time.new()
-		date = JSONModel(:date).new({
-			:label => "digitized",
-			:date_type => "single",
-			:expression => time.strftime("%Y %B").to_s + " " + time.day.to_s,
-			:begin => time.strftime("%Y-%m-%d")
-		})
-
-		date
-	end
-
-  # method to convert item record metadata to digital object metadata
-
 	def item_converter(item)
 		# date handler:
 		# copies existing dates without system fields, adds the current date as digitization date
@@ -98,8 +83,6 @@ class DigitalObjectManagerController < ApplicationController
 				:expression => "undated"
 				}))
 		end
-		date = get_date()
-		dates.push(date)
 
 		# linked agent handler:
 		# copies existing agents, flips creator to source, adds Special Collections and Archives as creator
@@ -139,19 +122,13 @@ class DigitalObjectManagerController < ApplicationController
 			:digital_object => { :ref => object_uri }
 			}))
 
-		date = get_date()
 		if item['dates'].empty?
 			item['dates'].push(JSONModel(:date).new({
 				:label => "creation",
 				:date_type => "single",
 				:expression => "undated"
 				}))
-		else
-			item['dates'].delete_if { |h| h['label'] == "digitized" }
 		end
-
-		item['dates'].push(date)
-
 		item
 	end
 
@@ -170,16 +147,8 @@ class DigitalObjectManagerController < ApplicationController
 
     # it merges item dates into the object if no dates are present in the object, or if the dates don't match
 		# it also adds a digitization date if none is present
-		if object['dates'].empty?
+		if object['dates'].empty? || object['dates'] != item['dates']
 			object['dates'] = item['dates']
-			# add a digitization date
-			date = get_date()
-			object['dates'].push(date)
-		else
-			# need to refine this, there's more going on here
-			if object['dates'] != item['dates']
-				object['dates'] = item['dates']
-			end
 		end
 
 		# it copies the item's extents into the digital object
