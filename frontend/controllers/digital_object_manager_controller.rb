@@ -206,6 +206,15 @@ class DigitalObjectManagerController < ApplicationController
 					}))
 			end
 
+			if note['type'] == "userestrict"
+				notes.push(JSONModel(:note_digital_object).new({
+					:type => note['type'],
+					:content => content,
+					:label => note['label'],
+					:publish => note['publish']
+					}))
+			end
+
 			if note['type'] == "odd"
 				if note.has_key?('label')
 				  if note['label'] == "Inscription and Marks"
