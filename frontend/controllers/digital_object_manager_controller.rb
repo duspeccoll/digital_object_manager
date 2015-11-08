@@ -1,7 +1,7 @@
 class DigitalObjectManagerController < ApplicationController
 
 	set_access_control "view_repository" => [:index, :search, :select],
-										 "update_digital_object_record" => [:create, :merge]
+                     "update_digital_object_record" => [:create, :merge]
 
 	def index
 		@page = 1
@@ -142,7 +142,7 @@ class DigitalObjectManagerController < ApplicationController
 
 		# it brings the language over from the item record, if not found in the object
 		if defined? item['language']
-			if object['language'] !=	item['language']
+			if object['language'] != item['language']
 				object['language'] = item['language']
 			end
 		end
