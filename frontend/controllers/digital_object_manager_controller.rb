@@ -1,7 +1,7 @@
 class DigitalObjectManagerController < ApplicationController
 
 	set_access_control "view_repository" => [:index, :search, :select],
-	                   "update_digital_object_record" => [:create, :merge]
+										 "update_digital_object_record" => [:create, :merge]
 
 	def index
 		@page = 1
@@ -12,7 +12,7 @@ class DigitalObjectManagerController < ApplicationController
 	end
 
 	def select
-    @item = JSONModel::HTTP::get_json(params[:uri])
+		@item = JSONModel::HTTP::get_json(params[:uri])
 		@objects = Array.new
 
 		@item['instances'].each do |instance|
@@ -25,13 +25,13 @@ class DigitalObjectManagerController < ApplicationController
 	def create
 		object = item_converter(JSONModel::HTTP::get_json(params[:item]))
 
-    response = JSONModel::HTTP.post_json(URI("#{JSONModel::HTTP.backend_url}/repositories/#{session[:repo_id]}/digital_objects"), object)
+		response = JSONModel::HTTP.post_json(URI("#{JSONModel::HTTP.backend_url}/repositories/#{session[:repo_id]}/digital_objects"), object)
 		if response.code === "200"
 			object_id = ASUtils.json_parse(response.body)['id']
 			object_uri = ASUtils.json_parse(response.body)['uri']
 			flash[:success] = I18n.t("plugins.digital_object_manager.messages.object_create", :title => "#{JSONModel::HTTP.get_json(object_uri)["title"]}").html_safe
 
-      item = item_updater(JSONModel::HTTP::get_json(params[:item]), object_uri)
+			item = item_updater(JSONModel::HTTP::get_json(params[:item]), object_uri)
 
 			item_response = JSONModel::HTTP.post_json(URI("#{JSONModel::HTTP.backend_url}#{item["uri"]}"), item.to_json)
 			if item_response.code === "200"
@@ -54,7 +54,7 @@ class DigitalObjectManagerController < ApplicationController
 		new_object = item_merger(JSONModel::HTTP::get_json(params[:item]), JSONModel::HTTP::get_json(params[:object]))
 
 		response = JSONModel::HTTP.post_json(URI("#{JSONModel::HTTP.backend_url}#{params[:object]}"), new_object.to_json)
-	  if response.code === "200"
+		if response.code === "200"
 			object_id = ASUtils.json_parse(response.body)['id']
 			object_uri = ASUtils.json_parse(response.body)['uri']
 			flash[:success] = I18n.t("plugins.digital_object_manager.messages.object_update", :title => "#{JSONModel::HTTP.get_json(object_uri)["title"]}").html_safe
@@ -134,7 +134,7 @@ class DigitalObjectManagerController < ApplicationController
 		item
 	end
 
-  # method to merge item record metadata into an existing digital object
+	# method to merge item record metadata into an existing digital object
 	# (assumes that the item record's metadata is primary)
 	def item_merger(item, object)
 		# make sure the object is published
@@ -142,12 +142,12 @@ class DigitalObjectManagerController < ApplicationController
 
 		# it brings the language over from the item record, if not found in the object
 		if defined? item['language']
-			if object['language'] !=  item['language']
+			if object['language'] !=	item['language']
 				object['language'] = item['language']
 			end
 		end
 
-    # it merges item dates into the object if no dates are present in the object, or if the dates don't match
+		# it merges item dates into the object if no dates are present in the object, or if the dates don't match
 		# it also adds a digitization date if none is present
 		if object['dates'].empty? || object['dates'] != item['dates']
 			object['dates'] = item['dates']
@@ -163,7 +163,7 @@ class DigitalObjectManagerController < ApplicationController
 			object['subjects'] = item['subjects']
 		end
 
-    # it copies the item's linked agents into the digital object, if the digital object has none
+		# it copies the item's linked agents into the digital object, if the digital object has none
 		# otherwise it does nothing (this needs refinement)
 		if object['linked_agents'].empty?
 			linked_agents = Array.new(item['linked_agents'])
@@ -219,15 +219,15 @@ class DigitalObjectManagerController < ApplicationController
 
 			if note['type'] == "odd"
 				if note.has_key?('label')
-				  if note['label'] == "Inscription and Marks"
-				    notes.push(JSONModel(:note_digital_object).new({
-					    :type => "inscription",
-					    :content => content,
-					    :publish => note['publish']
-					    }))
-				  end
-			  else
-			    notes.push(JSONModel(:note_digital_object).new({
+					if note['label'] == "Inscription and Marks"
+						notes.push(JSONModel(:note_digital_object).new({
+							:type => "inscription",
+							:content => content,
+							:publish => note['publish']
+							}))
+					end
+				else
+					notes.push(JSONModel(:note_digital_object).new({
 						:type => "note",
 						:content => content,
 						:publish => note['publish']
@@ -243,6 +243,6 @@ class DigitalObjectManagerController < ApplicationController
 					}))
 			end
 		end
-	  notes
+		notes
 	end
 end
