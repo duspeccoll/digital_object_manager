@@ -23,8 +23,7 @@ class DigitalObjectManagerController < ApplicationController
 	end
 
 	def create
-		item = JSONModel::HTTP::get_json(params[:item])
-		object = item_converter(item)
+		object = item_converter(JSONModel::HTTP::get_json(params[:item]))
 
     response = JSONModel::HTTP.post_json(URI("#{JSONModel::HTTP.backend_url}/repositories/#{session[:repo_id]}/digital_objects"), object)
 		if response.code === "200"
@@ -32,7 +31,7 @@ class DigitalObjectManagerController < ApplicationController
 			object_uri = ASUtils.json_parse(response.body)['uri']
 			flash[:success] = I18n.t("plugins.digital_object_manager.messages.object_create", :title => "#{JSONModel::HTTP.get_json(object_uri)["title"]}").html_safe
 
-      item = item_updater(item, object_uri)
+      item = item_updater(JSONModel::HTTP::get_json(params[:item]), object_uri)
 
 			item_response = JSONModel::HTTP.post_json(URI("#{JSONModel::HTTP.backend_url}#{item["uri"]}"), item.to_json)
 			if item_response.code === "200"
@@ -52,9 +51,7 @@ class DigitalObjectManagerController < ApplicationController
 	def merge
 		# Merges item metadata into the digital object, overwriting what it finds.
 		# Depending on how this tests we may need a separate method for the opposite action.
-		item = JSONModel::HTTP::get_json(params[:item])
-		object = JSONModel::HTTP::get_json(params[:object])
-		new_object = item_merger(item, object)
+		new_object = item_merger(JSONModel::HTTP::get_json(params[:item]), JSONModel::HTTP::get_json(params[:object]))
 
 		response = JSONModel::HTTP.post_json(URI("#{JSONModel::HTTP.backend_url}#{params[:object]}"), new_object.to_json)
 	  if response.code === "200"
@@ -76,13 +73,18 @@ class DigitalObjectManagerController < ApplicationController
 		# date handler:
 		# copies existing dates without system fields, adds the current date as digitization date
 		dates = Array.new(item['dates'])
-		if dates.empty?
-			dates.push(JSONModel(:date).new({
-				:label => "creation",
-				:date_type => "single",
-				:expression => "undated"
-				}))
+		unless dates.empty?
+			dates.each do |date|
+				if date['label'] == "creation"
+					date['label'] = "event"
+				end
+			end
 		end
+		dates.push(JSONModel(:date).new({
+			:label => "creation",
+			:date_type => "single",
+			:expression => "undated"
+			}))
 
 		# linked agent handler:
 		# copies existing agents, flips creator to source, adds Special Collections and Archives as creator
