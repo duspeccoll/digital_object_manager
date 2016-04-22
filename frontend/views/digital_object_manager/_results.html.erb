@@ -1,4 +1,5 @@
-<div class="record-pane">
+<% if params[:q] %>
+  <hr />
   <% if @search_data.results? %>
     <%= render_aspace_partial :partial => "shared/pagination_summary" %>
 
@@ -34,4 +35,4 @@
   <% else %>
     <p class="alert alert-info">No results</p>
   <% end %>
-</div>
+<% end %>

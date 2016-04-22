@@ -1,7 +1,14 @@
-.form-group {
-	border: 1px solid #DDD;
-	background-color: white;
+.digital-object-manager {
+	border: 1px solid #ddd;
+	background-color: #fff;
 	padding: 10px;
+	margin-bottom: 10px;
+}
+
+.form-group .dom-container {
+	border: 1px solid #DDD;
+	padding: 10px;
+	margin-bottom: 10px;
 }
 
 .digitized-object-search-form {

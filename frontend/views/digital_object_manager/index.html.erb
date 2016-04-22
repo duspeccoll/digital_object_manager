@@ -3,7 +3,9 @@
 <div class="row">
   <div class="col-md-8">
     <h2><%= I18n.t("plugins.digital_object_manager.title") %></h2>
-    <%= render_aspace_partial :partial => "search_form" %>
+    <div class="digital-object-manager">
+      <p><%= link_to I18n.t("plugins.digital_object_manager.actions.search"), {:controller => :digital_object_manager, :action => :search}, :class => "btn btn-default" %></p>
+    </div>
   </div>
 </div>
 

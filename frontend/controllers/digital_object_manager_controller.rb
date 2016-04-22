@@ -64,7 +64,6 @@ class DigitalObjectManagerController < ApplicationController
 			flash[:error] = I18n.t("plugins.digital_object_manager.messages.object_error", :error => "#{object_error}").html_safe
 			redirect_to request.referer
 		end
-
 	end
 
 	private

@@ -4,7 +4,7 @@
   <div class="col-md-8">
     <h2><%= I18n.t("plugins.digital_object_manager.title") %></h2>
 
-    <div class="digitized-object-record-pane">
+    <div class="digital-object-manager">
       <%= render_aspace_partial :partial => "shared/flash_messages" %>
 
       <h3><%= @item['title'] %></h3>
@@ -50,13 +50,6 @@
         <%= link_to I18n.t("plugins.digital_object_manager.actions.create"), {:controller => :digital_object_manager, :action => :create, :item => @item['uri']}, :class => "btn btn-xs btn-primary" %>
       </p>
     </div>
-  </div>
-</div>
-<hr/>
-
-<div class="row">
-  <div class="col-md-8">
-    <%= render_aspace_partial :partial => "search_form" %>
   </div>
 </div>
 
