@@ -5,21 +5,16 @@
 	margin-bottom: 10px;
 }
 
+.digital-object-manager h3 {
+	margin: 10px 0;
+}
+
 .form-group .dom-container {
 	border: 1px solid #DDD;
 	padding: 10px;
 	margin-bottom: 10px;
 }
 
-.digitized-object-search-form {
-	border: 1px solid #DDD;
-	border-radius: 5px;
-	background-color: #FFF;
-	padding: 4px;
-}
-
-.digitized-object-record-pane {
-	border-top: 0 none;
-	background-color: #FFF;
-	padding: 10px;
+.dom-action {
+	padding-left: 10px;
 }
