@@ -1,0 +1,12 @@
+<%= form_tag({:action => :download}, :class => "form-search", :multipart => true) do %>
+
+<div class="control-group form-group required">
+  <div class="controls">
+    <%= file_field_tag 'datafile' %>
+    <button type="submit" id="upload-file-button" class="btn btn-sm btn-default" title="Upload File">
+      <%= I18n.t("plugins.digital_object_manager.actions.upload") %>
+    </button>
+  </div>
+</div>
+
+<% end %>

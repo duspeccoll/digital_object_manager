@@ -3,16 +3,16 @@ en:
     digital_object_manager:
       title: Digital Object Manager
       label: Digital Object Manager
-      search_label: Search Items
       actions:
-        create: Create New
-        merge: Merge
-        search: Search Items
-        select: Select
-        view: View
+        batch_download: Batch MODS Download
+        batch_update: Batch Update
+        export_mods: Export MODS
+        upload: Upload
+      defaults:
+        link_title: "Special Collections @ DU"
+        prefix: "http://hdl.handle.net/10176/"
       messages:
-        object_create: "Digital object <strong>%{title}</strong> created"
-        object_update: "Digital object <strong>%{title}</strong> updated"
-        object_error: "Unable to create object: <strong>%{error}</strong>"
-        item_update: "<br/>Archival object <strong>%{title}</strong> updated"
-        item_error: "Couldn't add object reference: <strong>%{uri}</strong>"
+        add_new_link: Added Islandora Link
+        update_link: Updated Islandora Link
+        create_dao: Created Digital Object
+        update_dao: Updated Digital Object

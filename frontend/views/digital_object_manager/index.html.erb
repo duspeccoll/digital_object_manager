@@ -4,7 +4,16 @@
   <div class="col-md-8">
     <h2><%= I18n.t("plugins.digital_object_manager.title") %></h2>
     <div class="digital-object-manager">
-      <p><%= link_to I18n.t("plugins.digital_object_manager.actions.search"), {:controller => :digital_object_manager, :action => :search}, :class => "btn btn-default" %></p>
+      <h3><%= I18n.t("plugins.digital_object_manager.actions.batch_download") %></h3>
+      <div class="dom-action">
+        <p>Generates a ZIP archive of MODS records based on a list of archival objects (CSV or tab-delimited text format) supplied by the user.</p>
+        <p><%= render_aspace_partial :partial => "download_form" %></p>
+      </div>
+      <h3><%= I18n.t("plugins.digital_object_manager.actions.batch_update") %></h3>
+      <div class="dom-action">
+        <p>Adds or modifies handles to item and digital object records based on a list of item number/handle pairs (CSV format) supplied by the user.</p>
+        <p><%= render_aspace_partial :partial => "upload_form" %></p>
+      </div>
     </div>
   </div>
 </div>
