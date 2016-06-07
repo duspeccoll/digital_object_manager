@@ -4,6 +4,7 @@
   <div class="col-md-8">
     <h2><%= I18n.t("plugins.digital_object_manager.title") %></h2>
     <div class="digital-object-manager">
+      <%= render_aspace_partial :partial => "shared/flash_messages" %>
       <h3><%= I18n.t("plugins.digital_object_manager.actions.batch_download") %></h3>
       <div class="dom-action">
         <p>Generates a ZIP archive of MODS records based on a list of archival objects (CSV or tab-delimited text format) supplied by the user.</p>

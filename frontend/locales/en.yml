@@ -12,7 +12,4 @@ en:
         link_title: "Special Collections @ DU"
         prefix: "http://hdl.handle.net/10176/"
       messages:
-        add_new_link: Added Islandora Link
-        update_link: Updated Islandora Link
-        create_dao: Created Digital Object
-        update_dao: Updated Digital Object
+        invalid_mime_type: "<strong>Invalid MIME type:</strong> %{filename} (must be text/plain, text/csv, or application/vnd.ms-excel)"
