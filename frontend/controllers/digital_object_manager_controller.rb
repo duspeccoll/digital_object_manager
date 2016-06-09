@@ -80,7 +80,10 @@ class DigitalObjectManagerController < ApplicationController
 				if row.length != 2
 					log << "Row must contain exactly two elements. No action taken."
 				else
-					search_data = Search.all(session[:repo_id], { 'q' => row[0] })
+					# limit our search to archival objects so we only get item records
+					search_data = Search.all(session[:repo_id], {
+						"q" => row[0], "filter_term[]" => { "primary_type" => "archival_object" }.to_json
+					})
 					if search_data.results?
 						search_data['results'].each do |result|
 							obj = JSON.parse(result['json'])
@@ -89,24 +92,32 @@ class DigitalObjectManagerController < ApplicationController
 									item = JSONModel::HTTP.get_json(obj['uri'])
 
 									# working with Islandora links on the item record
-									if (item['external_documents'].length > 0 && item['external_documents'].map{ |doc| doc['title'] }.include?("#{I18n.t("plugins.digital_object_manager.defaults.link_title")}"))
-										item, log = update_item_link(item, row[1], log)
-									else
+									if item['external_documents'].empty?
 										item, log = add_item_link(item, row[1], log)
+									else
+										if item['external_documents'].map{ |doc| doc['title'] }.include?("#{I18n.t("plugins.digital_object_manager.defaults.link_title")}")
+											item, log = update_item_link(item, row[1], log)
+										else
+											item, log = add_item_link(item, row[1], log)
+										end
 									end
 
 									# working with digital object instances
-									if (item['instances'].length > 0 && item['instances'].map{ |i| i['instance_type'] }.include?("digital_object"))
-										item['instances'].each do |instance|
-											log = update_digital_object(instance, row[1], log) if instance['instance_type'] == "digital_object"
-										end
-									else
+									if item['instances'].empty?
 										item, log = add_digital_object(item, row[1], log)
+									else
+										if item['instances'].map{ |i| i['instance_type'] }.include?("digital_object")
+											item['instances'].each do |instance|
+												log = update_digital_object(instance, row[1], log) if instance['instance_type'] == "digital_object"
+											end
+										else
+											item, log = add_digital_object(item, row[1], log)
+										end
 									end
 
 									JSONModel::HTTP.post_json(URI("#{JSONModel::HTTP.backend_url}#{obj['uri']}"), item.to_json)
 								else
-									log << "Handle provided did not match expected pattern. No action taken."
+									log << "No action taken. Ensure that your handle is properly formed."
 								end
 							end
 						end
@@ -142,8 +153,10 @@ class DigitalObjectManagerController < ApplicationController
 	def update_item_link(item, handle, log)
 		item['external_documents'].each do |doc|
 			if doc['title'] == I18n.t("plugins.digital_object_manager.defaults.link_title")
-				doc['location'].gsub!(/codu:\d+/, handle)
-				log << "Updated #{item['uri']} with Fedora handle #{handle}. "
+				unless doc['location'].end_with?(handle)
+					doc['location'].gsub!(/codu:\d+/, handle)
+					log << "Updated #{item['uri']} with Fedora handle #{handle}. "
+				end
 			end
 		end
 		return item, log
@@ -160,7 +173,9 @@ class DigitalObjectManagerController < ApplicationController
 			uri = ASUtils.json_parse(resp.body)['uri']
 			item['instances'].push(JSONModel(:instance).new({
 				:instance_type => "digital_object",
-				:digital_object => uri
+				:digital_object => {
+					:ref => uri
+				}
 			}))
 			log << "Created #{uri} with Fedora handle #{handle}. Linked #{uri} to #{item['uri']}."
 		end
@@ -169,9 +184,12 @@ class DigitalObjectManagerController < ApplicationController
 
 	def update_digital_object(instance, handle, log)
 		object = JSONModel::HTTP.get_json("#{instance['digital_object']['ref']}")
-		object['digital_object_id'] = "#{I18n.t("plugins.digital_object_manager.defaults.prefix")}#{handle}"
-		JSONModel::HTTP.post_json(URI("#{JSONModel::HTTP.backend_url}#{instance['digital_object']['ref']}"), object.to_json)
-		log << "Added Fedora handle #{handle} to #{object['uri']}."
+		url = "#{I18n.t("plugins.digital_object_manager.defaults.prefix")}#{handle}"
+		unless object['digital_object_id'] = url
+			object['digital_object_id'] = "#{url}"
+			JSONModel::HTTP.post_json(URI("#{JSONModel::HTTP.backend_url}#{instance['digital_object']['ref']}"), object.to_json)
+			log << "Added Fedora handle #{handle} to #{object['uri']}."
+		end
 		return log
 	end
 end
