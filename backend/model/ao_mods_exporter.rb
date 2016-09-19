@@ -1,4 +1,4 @@
-class MODSSerializer < ASpaceExport::Serializer
+class AOMODSSerializer < ASpaceExport::Serializer
   serializer_for :ao_mods
 
   include JSONModel
@@ -81,14 +81,6 @@ class MODSSerializer < ASpaceExport::Serializer
       else
         serialize_name(name, xml)
       end
-    end
-
-    mods.parts.each do |part|
-      xml.part(:ID => part['id']) {
-        xml.detail {
-          xml.title part['title']
-        }
-      }
     end
 
   end
