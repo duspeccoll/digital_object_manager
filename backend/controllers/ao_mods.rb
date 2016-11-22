@@ -7,7 +7,7 @@ class ArchivesSpaceService < Sinatra::Base
     .permissions([:view_repository])
     .returns([200, "(:archival_object)"]) \
   do
-    obj = resolve_references(ArchivalObject.to_jsonmodel(params[:id]), ['repository::agent_representation', 'linked_agents', 'subjects'])
+    obj = resolve_references(ArchivalObject.to_jsonmodel(params[:id]), ['repository::agent_representation', 'linked_agents', 'subjects', 'digital_object'])
     mods = ASpaceExport.model(:ao_mods).from_archival_object(JSONModel(:archival_object).new(obj))
 
     xml_response(ASpaceExport::serialize(mods))

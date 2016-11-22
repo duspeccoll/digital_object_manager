@@ -14,6 +14,7 @@ class AOMODSModel < ASpaceExport::ExportModel
 
   # begin plugin
   attr_accessor :local_identifier
+  attr_accessor :digital_origin
   # end plugin
 
   @archival_object_map = {
@@ -22,7 +23,10 @@ class AOMODSModel < ASpaceExport::ExportModel
     :subjects => :handle_subjects,
     :linked_agents => :handle_agents,
     :notes => :handle_notes,
-    :component_id => :local_identifier=
+    # begin plugin
+    :component_id => :local_identifier=,
+    :instances => :handle_instances
+    # end plugin
   }
 
   @name_type_map = {
@@ -40,12 +44,24 @@ class AOMODSModel < ASpaceExport::ExportModel
     'prefix' => 'termsOfAddress'
   }
 
+  # begin plugin
+  @digital_origin_map = {
+    'born_digital' => "born digital",
+    'digitized_micro' => "digitized microfilm",
+    'digitized_other' => "digitized other analog",
+    'reformatted' => "reformatted digital"
+  }
+  # end plugin
+
   def initialize
     @extents = []
     @notes = []
     @subjects = []
     @names = []
     @parts = []
+    # begin plugin
+    @digital_origin = ""
+    # end plugin
   end
 
   # meaning, 'archival object' in the abstract
@@ -68,6 +84,12 @@ class AOMODSModel < ASpaceExport::ExportModel
   def self.name_part_type_map
     @name_part_type_map
   end
+
+  # begin plugin
+  def self.digital_origin_map
+    @digital_origin_map
+  end
+  # end plugin
 
   @@mods_note = Struct.new(:tag, :type, :label, :content, :wrapping_tag)
   def self.new_mods_note(*a)
@@ -152,6 +174,13 @@ class AOMODSModel < ASpaceExport::ExportModel
     end
   end
 
+  # begin plugin
+  def handle_instances(instances)
+    instances.map { |i| i['digital_object']['_resolved'] }.each do |object|
+      self.digital_origin = self.class.digital_origin_map[object['user_defined']['enum_2']] if digital_origin.empty?
+    end
+  end
+  # end plugin
 
   def handle_agents(linked_agents)
     linked_agents.each do |link|
