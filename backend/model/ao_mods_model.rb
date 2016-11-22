@@ -177,7 +177,11 @@ class AOMODSModel < ASpaceExport::ExportModel
   # begin plugin
   def handle_instances(instances)
     instances.map { |i| i['digital_object']['_resolved'] }.each do |object|
-      self.digital_origin = self.class.digital_origin_map[object['user_defined']['enum_2']] if digital_origin.empty?
+      if object['user_defined']
+        unless object['user_defined']['enum_2'].nil?
+          self.digital_origin = self.class.digital_origin_map[object['user_defined']['enum_2']] if digital_origin.empty?
+        end
+      end
     end
   end
   # end plugin
